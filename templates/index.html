@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>YouTube Comment Sentiment</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <h1>M1 테스트</h1>
+
+    <label>유튜브 링크</label>
+    <input id="url" placeholder="https://www.youtube.com/watch?v=..." />
+
+    <label>댓글 수</label>
+    <select id="maxComments">
+      <option value="50">50</option>
+      <option value="100" selected>100</option>
+      <option value="200">200</option>
+    </select>
+
+    <button id="btn">분석 요청 보내기</button>
+
+    <pre id="result"></pre>
+    <pre id="error"></pre>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.wrap {
+  max-width: 520px;
+  margin: 40px auto;
+  display: grid;
+  gap: 10px;
+}
+
+input, select, button {
+  padding: 10px;
+  font-size: 14px;
+}
+
+pre {
+  background: #f5f5f5;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+#error {
+  color: #c00;
+}
