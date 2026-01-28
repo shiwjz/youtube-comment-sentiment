@@ -1,28 +1,42 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8" />
-  <title>YouTube Comment Sentiment</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube 댓글 반응 분석</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <main class="wrap">
-    <h1>M1 테스트</h1>
+  <main class="container">
+    <h1>YouTube 댓글 반응 분석</h1>
 
-    <label>유튜브 링크</label>
-    <input id="url" placeholder="https://www.youtube.com/watch?v=..." />
+    <section class="card">
+      <label for="url">유튜브 링크</label>
+      <input id="url" type="text" placeholder="https://www.youtube.com/watch?v=..." />
 
-    <label>댓글 수</label>
-    <select id="maxComments">
-      <option value="50">50</option>
-      <option value="100" selected>100</option>
-      <option value="200">200</option>
-    </select>
+      <label for="maxComments">댓글 개수</label>
+      <select id="maxComments">
+        <option value="50">50</option>
+        <option value="100" selected>100</option>
+        <option value="200">200</option>
+      </select>
 
-    <button id="btn">분석 요청 보내기</button>
+      <button id="analyzeBtn">분석하기</button>
 
-    <pre id="result"></pre>
-    <pre id="error"></pre>
+      <div id="loading" class="hidden">분석 중...</div>
+      <div id="error" class="error"></div>
+    </section>
+
+    <section class="card">
+  <h2>결과</h2>
+
+  <div id="summary" class="summary">여기에 요약이 표시됩니다.</div>
+
+  <ul id="commentList" class="comment-list"></ul>
+
+  <pre id="result" class="hidden"></pre>
+</section>
+
   </main>
 
   <script src="/static/script.js"></script>
