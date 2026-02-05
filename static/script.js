@@ -23,6 +23,11 @@ const posPctEl = document.getElementById("posPct");
 const neuPctEl = document.getElementById("neuPct");
 const negPctEl = document.getElementById("negPct");
 
+const moreBtn = document.getElementById("moreBtn");
+let allComments = [];
+let shownCount = 20;
+
+const sortSelect = document.getElementById("sort");
 
 function setLoading(isLoading) {
   loadingEl.classList.toggle("hidden", !isLoading);
@@ -41,22 +46,40 @@ function escapeHtml(str = "") {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
-
 function renderSummary(data) {
-  const total = data?.counts?.totalFetched ?? 0;
-  summaryEl.textContent = `수집 완료: ${total}개 댓글`;
+  const commentsLen = Array.isArray(data.comments) ? data.comments.length : 0;
+  const total =
+    data?.counts?.totalFetched ??
+    data?.totalFetched ??
+    commentsLen;
+
+  const shown = Math.min(shownCount, commentsLen);
+  summaryEl.textContent = `수집 완료: ${total}개 댓글 (미리보기 ${shown}개)`;
 }
 
 function renderComments(data) {
   commentListEl.innerHTML = "";
 
-  const comments = Array.isArray(data.comments) ? data.comments : [];
-  const preview = comments.slice(0, 20);
+  allComments = Array.isArray(data.comments) ? data.comments : [];
 
-  if (preview.length === 0) {
+  const sort = sortSelect?.value || "latest";
+
+  allComments.sort((a, b) => {
+    if (sort === "likes") {
+      return Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0);
+    }
+    // latest
+    return String(b.publishedAt || "").localeCompare(String(a.publishedAt || ""));
+  });
+
+
+  if (allComments.length === 0) {
     commentListEl.innerHTML = `<li>댓글이 없거나 가져오지 못했어.</li>`;
+    moreBtn.classList.add("hidden");
     return;
   }
+
+  const preview = allComments.slice(0, shownCount);
 
   for (const c of preview) {
     const li = document.createElement("li");
@@ -71,7 +94,17 @@ function renderComments(data) {
     `;
     commentListEl.appendChild(li);
   }
+
+  // 더보기 버튼 표시 여부
+  if (shownCount < allComments.length) {
+    moreBtn.classList.remove("hidden");
+    moreBtn.textContent = `댓글 더보기 (${Math.min(shownCount + 20, allComments.length)}/${allComments.length})`;
+  } else {
+    moreBtn.classList.add("hidden");
+  }
 }
+
+
 
 analyzeBtn.addEventListener("click", async () => {
   showError("");
@@ -113,12 +146,15 @@ analyzeBtn.addEventListener("click", async () => {
 
     // 성공 시 결과 출력 (M1은 텍스트로 OK)
    // M2: 요약 + 댓글 리스트 렌더링
+shownCount = 20; 
 renderSummary(data);
 renderComments(data);
 renderSentiment(data);
 
-// 디버그용(원하면 숨겨도 됨)
-resultEl.textContent = JSON.stringify(data, null, 2);
+
+// 성공이면 result는 안 보여주거나 비우기
+resultEl.textContent = "";
+
 
   } catch (err) {
     showError("요청 실패! 서버가 켜져 있는지 확인해줘.");
@@ -160,3 +196,15 @@ function renderSentiment(data) {
 
   sentimentBox.classList.remove("hidden");
 }
+
+
+moreBtn.addEventListener("click", () => {
+  shownCount += 20;
+  renderComments({ comments: allComments });
+});
+
+sortSelect.addEventListener("change", () => {
+      shownCount = 20;
+      renderComments({ comments: allComments });
+    });
+

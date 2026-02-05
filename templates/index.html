@@ -21,8 +21,14 @@
         <option value="200">200</option>
       </select>
 
-      <button id="analyzeBtn">분석하기</button>
+      <label for="sort">정렬</label>
+      <select id="sort">
+        <option value="latest" selected>최신순</option>
+        <option value="likes">좋아요순</option>
+      </select>
 
+
+      <button id="analyzeBtn">분석하기</button>
       <div id="loading" class="hidden">분석 중...</div>
       <div id="error" class="error"></div>
     </section>
@@ -54,6 +60,11 @@
       <span>부정 <b id="negPct">0%</b></span>
     </div>
   </div>
+  <div id="summary"></div>
+  <ul id="commentList"></ul>
+  <button id="moreBtn" class="hidden">댓글 더보기</button>
+
+  <pre id="result">여기에 결과가 표시됩니다.</pre>
 
 
 </section>
