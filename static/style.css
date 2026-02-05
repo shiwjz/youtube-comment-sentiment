@@ -61,3 +61,15 @@ pre {
 .comment-text { white-space: pre-wrap; line-height: 1.4; }
 .comment-meta { margin-top: 8px; font-size: 12px; opacity: 0.7; display: flex; gap: 10px; flex-wrap: wrap; }
 #summary { margin-top: 8px; font-weight: 600; }
+
+.sentiment-box { margin: 12px 0 16px; }
+.sentiment-counts { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; font-size: 14px; opacity: 0.9; }
+
+.sentiment-bar { display:flex; height: 14px; border-radius: 999px; overflow:hidden; border: 1px solid #eee; margin-top:10px; }
+.bar { height: 100%; }
+.bar.pos { background: #2ecc71; }
+.bar.neu { background: #bdc3c7; }
+.bar.neg { background: #e74c3c; }
+
+.sentiment-percent { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; font-size: 13px; opacity: 0.85; }
+.hidden { display:none; }

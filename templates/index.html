@@ -30,11 +30,32 @@
     <section class="card">
   <h2>결과</h2>
 
-  <div id="summary" class="summary">여기에 요약이 표시됩니다.</div>
+  <!-- M3: 감정 요약 -->
+  <div id="sentimentBox" class="sentiment-box hidden">
+    <div class="sentiment-summary">
+      <div><b id="summaryText">요약 문구</b></div>
+      <div class="sentiment-counts">
+        <span>긍정: <b id="posCount">0</b></span>
+        <span>중립: <b id="neuCount">0</b></span>
+        <span>부정: <b id="negCount">0</b></span>
+      </div>
+    </div>
 
-  <ul id="commentList" class="comment-list"></ul>
+    <!-- M3: 간단 바 차트 -->
+    <div class="sentiment-bar">
+      <div id="posBar" class="bar pos" style="width:0%"></div>
+      <div id="neuBar" class="bar neu" style="width:0%"></div>
+      <div id="negBar" class="bar neg" style="width:0%"></div>
+    </div>
 
-  <pre id="result" class="hidden"></pre>
+    <div class="sentiment-percent">
+      <span>긍정 <b id="posPct">0%</b></span>
+      <span>중립 <b id="neuPct">0%</b></span>
+      <span>부정 <b id="negPct">0%</b></span>
+    </div>
+  </div>
+
+
 </section>
 
   </main>

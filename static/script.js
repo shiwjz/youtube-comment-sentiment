@@ -8,6 +8,21 @@ const resultEl = document.getElementById("result");
 const summaryEl = document.getElementById("summary");
 const commentListEl = document.getElementById("commentList");
 
+const sentimentBox = document.getElementById("sentimentBox");
+const summaryTextEl = document.getElementById("summaryText");
+
+const posCountEl = document.getElementById("posCount");
+const neuCountEl = document.getElementById("neuCount");
+const negCountEl = document.getElementById("negCount");
+
+const posBarEl = document.getElementById("posBar");
+const neuBarEl = document.getElementById("neuBar");
+const negBarEl = document.getElementById("negBar");
+
+const posPctEl = document.getElementById("posPct");
+const neuPctEl = document.getElementById("neuPct");
+const negPctEl = document.getElementById("negPct");
+
 function setLoading(isLoading) {
   loadingEl.classList.toggle("hidden", !isLoading);
   analyzeBtn.disabled = isLoading;
@@ -99,6 +114,7 @@ analyzeBtn.addEventListener("click", async () => {
    // M2: 요약 + 댓글 리스트 렌더링
 renderSummary(data);
 renderComments(data);
+renderSentiment(data);
 
 // 디버그용(원하면 숨겨도 됨)
 resultEl.textContent = JSON.stringify(data, null, 2);
@@ -110,3 +126,36 @@ resultEl.textContent = JSON.stringify(data, null, 2);
     setLoading(false);
   }
 });
+
+function renderSentiment(data) {
+  const s = data.sentiment;
+  if (!s) {
+    sentimentBox.classList.add("hidden");
+    return;
+  }
+
+  const pos = Number(s.positive ?? 0);
+  const neu = Number(s.neutral ?? 0);
+  const neg = Number(s.negative ?? 0);
+  const total = Math.max(1, pos + neu + neg);
+
+  const posPct = Math.round((pos / total) * 100);
+  const neuPct = Math.round((neu / total) * 100);
+  const negPct = Math.round((neg / total) * 100);
+
+  summaryTextEl.textContent = data.summary || "요약 문구가 없습니다.";
+
+  posCountEl.textContent = String(pos);
+  neuCountEl.textContent = String(neu);
+  negCountEl.textContent = String(neg);
+
+  posBarEl.style.width = `${posPct}%`;
+  neuBarEl.style.width = `${neuPct}%`;
+  negBarEl.style.width = `${negPct}%`;
+
+  posPctEl.textContent = `${posPct}%`;
+  neuPctEl.textContent = `${neuPct}%`;
+  negPctEl.textContent = `${negPct}%`;
+
+  sentimentBox.classList.remove("hidden");
+}
