@@ -23,6 +23,7 @@ const posPctEl = document.getElementById("posPct");
 const neuPctEl = document.getElementById("neuPct");
 const negPctEl = document.getElementById("negPct");
 
+
 function setLoading(isLoading) {
   loadingEl.classList.toggle("hidden", !isLoading);
   analyzeBtn.disabled = isLoading;
