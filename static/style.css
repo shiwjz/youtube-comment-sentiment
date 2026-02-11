@@ -41,6 +41,11 @@ button {
   font-weight: 700;
 }
 
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .error {
   margin-top: 10px;
   color: #b00020;
@@ -56,20 +61,141 @@ pre {
   word-break: break-word;
 }
 
-#commentList { list-style: none; padding: 0; margin: 12px 0 0; display: grid; gap: 10px; }
-.comment-item { padding: 12px; border: 1px solid #eee; border-radius: 12px; }
-.comment-text { white-space: pre-wrap; line-height: 1.4; }
-.comment-meta { margin-top: 8px; font-size: 12px; opacity: 0.7; display: flex; gap: 10px; flex-wrap: wrap; }
-#summary { margin-top: 8px; font-weight: 600; }
+/* ✅ 체크박스 라벨 */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-weight: 600;
+}
+.checkbox-row input {
+  width: auto;
+}
 
+/* 제목 가운데 정렬 */
+/* 제목 가운데 정렬 */
+h1 {
+  text-align: center;
+}
+
+/* ✅ 감정 필터 버튼 */
+.filter-row {
+  display: flex;
+  gap: 8px;
+  margin: 10px 0 6px;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* 🔥 왼쪽 정렬 */
+}
+
+.filter-btn {
+  width: auto;
+  margin-top: 0;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  color: white;
+  opacity: 0.7;
+  transition: 0.2s;
+}
+
+/* 기본 색상 */
+.filter-btn[data-filter="all"] {
+  background: #111;
+}
+
+.filter-btn[data-filter="positive"] {
+  background: #2ecc71;
+}
+
+.filter-btn[data-filter="neutral"] {
+  background: #95a5a6;
+}
+
+.filter-btn[data-filter="negative"] {
+  background: #e74c3c;
+}
+
+/* 활성화 버튼 */
+.filter-btn.is-active {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+/* 댓글 리스트 */
+#commentList {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  display: grid;
+  gap: 10px;
+}
+
+.comment-item {
+  padding: 14px;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.comment-top {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.comment-text {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.comment-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.7;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+#summary {
+  margin-top: 8px;
+  font-weight: 600;
+}
+
+/* M3 감정 박스 */
 .sentiment-box { margin: 12px 0 16px; }
 .sentiment-counts { display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; font-size: 14px; opacity: 0.9; }
 
-.sentiment-bar { display:flex; height: 14px; border-radius: 999px; overflow:hidden; border: 1px solid #eee; margin-top:10px; }
+.sentiment-bar {
+  display:flex;
+  height: 14px;
+  border-radius: 999px;
+  overflow:hidden;
+  border: 1px solid #eee;
+  margin-top:10px;
+}
 .bar { height: 100%; }
 .bar.pos { background: #2ecc71; }
 .bar.neu { background: #bdc3c7; }
 .bar.neg { background: #e74c3c; }
 
 .sentiment-percent { display:flex; gap:12px; flex-wrap:wrap; margin-top:8px; font-size: 13px; opacity: 0.85; }
-.hidden { display:none; }
+
+/* ✅ 감정 배지 */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+  color: white;
+}
+
+.badge.positive { background: #2ecc71; }
+.badge.neutral  { background: #95a5a6; }
+.badge.negative { background: #e74c3c; }

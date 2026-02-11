@@ -24,10 +24,19 @@ const neuPctEl = document.getElementById("neuPct");
 const negPctEl = document.getElementById("negPct");
 
 const moreBtn = document.getElementById("moreBtn");
+
+const sortSelect = document.getElementById("sort");
+const langSelect = document.getElementById("langSelect");
+const randomCheckbox = document.getElementById("randomSample");
+
+// ✅ 감정 필터 버튼들 (index.html에 추가해둔 것)
+const filterBtns = document.querySelectorAll(".filter-btn");
+let currentFilter = "all";
+
 let allComments = [];
 let shownCount = 20;
 
-const sortSelect = document.getElementById("sort");
+
 
 function setLoading(isLoading) {
   loadingEl.classList.toggle("hidden", !isLoading);
@@ -46,6 +55,18 @@ function escapeHtml(str = "") {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+function sentimentLabel(sentiment) {
+  if (sentiment === "positive") return "긍정";
+  if (sentiment === "negative") return "부정";
+  return "중립";
+}
+
+function getFilteredComments() {
+  if (currentFilter === "all") return allComments;
+  return allComments.filter(c => (c.sentiment || "neutral") === currentFilter);
+}
+
 function renderSummary(data) {
   const commentsLen = Array.isArray(data.comments) ? data.comments.length : 0;
   const total =
@@ -53,39 +74,48 @@ function renderSummary(data) {
     data?.totalFetched ??
     commentsLen;
 
-  const shown = Math.min(shownCount, commentsLen);
-  summaryEl.textContent = `수집 완료: ${total}개 댓글 (미리보기 ${shown}개)`;
+  const filteredLen = getFilteredComments().length;
+  const shown = Math.min(shownCount, filteredLen);
+
+  const filterLabel =
+    currentFilter === "all" ? "전체" :
+    currentFilter === "positive" ? "긍정" :
+    currentFilter === "neutral" ? "중립" : "부정";
+
+  summaryEl.textContent = `수집 완료: ${total}개 댓글 / 현재 필터: ${filterLabel} (${filteredLen}개) (미리보기 ${shown}개)`;
 }
 
-function renderComments(data) {
+function renderComments() {
   commentListEl.innerHTML = "";
 
-  allComments = Array.isArray(data.comments) ? data.comments : [];
-
-  const sort = sortSelect?.value || "latest";
-
-  allComments.sort((a, b) => {
-    if (sort === "likes") {
-      return Number(b.likeCount ?? 0) - Number(a.likeCount ?? 0);
-    }
-    // latest
-    return String(b.publishedAt || "").localeCompare(String(a.publishedAt || ""));
-  });
-
-
-  if (allComments.length === 0) {
+  if (!Array.isArray(allComments) || allComments.length === 0) {
     commentListEl.innerHTML = `<li>댓글이 없거나 가져오지 못했어.</li>`;
     moreBtn.classList.add("hidden");
     return;
   }
 
-  const preview = allComments.slice(0, shownCount);
+  // ✅ 서버가 준 순서 그대로 사용 (프론트 정렬 X)
+  const filtered = getFilteredComments();
+
+  if (filtered.length === 0) {
+    commentListEl.innerHTML = `<li>현재 필터에 해당하는 댓글이 없어.</li>`;
+    moreBtn.classList.add("hidden");
+    return;
+  }
+
+  const preview = filtered.slice(0, shownCount);
 
   for (const c of preview) {
+    const s = (c.sentiment || "neutral");
     const li = document.createElement("li");
     li.className = "comment-item";
     li.innerHTML = `
+      <div class="comment-top">
+        <span class="badge ${escapeHtml(s)}">${sentimentLabel(s)}</span>
+      </div>
+
       <div class="comment-text">${escapeHtml(c.text || "")}</div>
+
       <div class="comment-meta">
         <span>${escapeHtml(c.author || "익명")}</span>
         <span>👍 ${Number(c.likeCount ?? 0)}</span>
@@ -96,73 +126,13 @@ function renderComments(data) {
   }
 
   // 더보기 버튼 표시 여부
-  if (shownCount < allComments.length) {
+  if (shownCount < filtered.length) {
     moreBtn.classList.remove("hidden");
-    moreBtn.textContent = `댓글 더보기 (${Math.min(shownCount + 20, allComments.length)}/${allComments.length})`;
+    moreBtn.textContent = `댓글 더보기 (${Math.min(shownCount + 20, filtered.length)}/${filtered.length})`;
   } else {
     moreBtn.classList.add("hidden");
   }
 }
-
-
-
-analyzeBtn.addEventListener("click", async () => {
-  showError("");
-  resultEl.textContent = "요청 중...";
-
-  const url = urlInput.value.trim();
-  const maxComments = Number(maxSelect.value);
-
-  if (!url) {
-    showError("유튜브 링크를 입력해줘!");
-    resultEl.textContent = "입력값 없음";
-    return;
-  }
-
-  try {
-    setLoading(true);
-
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, maxComments }),
-    });
-
-    // 에러 응답도 JSON으로 온다고 가정
-    const data = await res.json();
-
-    if (!res.ok) {
-      showError(data.error || "서버 오류가 발생했어.");
-      resultEl.textContent = JSON.stringify(data, null, 2);
-      return;
-    }
-
-    if (data.ok === false) {
-  showError(data.error || "요청은 됐는데 처리 실패했어.");
-  resultEl.textContent = JSON.stringify(data, null, 2);
-  return;
-}
-
-
-    // 성공 시 결과 출력 (M1은 텍스트로 OK)
-   // M2: 요약 + 댓글 리스트 렌더링
-shownCount = 20; 
-renderSummary(data);
-renderComments(data);
-renderSentiment(data);
-
-
-// 성공이면 result는 안 보여주거나 비우기
-resultEl.textContent = "";
-
-
-  } catch (err) {
-    showError("요청 실패! 서버가 켜져 있는지 확인해줘.");
-    resultEl.textContent = String(err);
-  } finally {
-    setLoading(false);
-  }
-});
 
 function renderSentiment(data) {
   const s = data.sentiment;
@@ -197,14 +167,100 @@ function renderSentiment(data) {
   sentimentBox.classList.remove("hidden");
 }
 
+// ✅ 분석하기 버튼
+analyzeBtn.addEventListener("click", async () => {
+  showError("");
+  resultEl.textContent = "요청 중...";
 
-moreBtn.addEventListener("click", () => {
-  shownCount += 20;
-  renderComments({ comments: allComments });
-});
+  const url = urlInput.value.trim();
+  const maxComments = Number(maxSelect.value);
 
-sortSelect.addEventListener("change", () => {
-      shownCount = 20;
-      renderComments({ comments: allComments });
+  // ✅ M4 옵션들
+  const sort = sortSelect?.value || "latest";
+  const lang = langSelect?.value || "auto";
+  const randomSample = !!randomCheckbox?.checked;
+
+  if (!url) {
+    showError("유튜브 링크를 입력해줘!");
+    resultEl.textContent = "입력값 없음";
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        url,
+        maxComments,
+        sort,
+        lang,
+        randomSample
+      }),
     });
 
+    const data = await res.json();
+
+    if (!res.ok) {
+      showError(data.error || "서버 오류가 발생했어.");
+      resultEl.textContent = JSON.stringify(data, null, 2);
+      return;
+    }
+
+    if (data.ok === false) {
+      showError(data.error || "요청은 됐는데 처리 실패했어.");
+      resultEl.textContent = JSON.stringify(data, null, 2);
+      return;
+    }
+
+    // ✅ 성공 처리
+    shownCount = 20;
+    allComments = Array.isArray(data.comments) ? data.comments : [];
+
+    renderSentiment(data);
+    renderSummary(data);
+    renderComments();
+
+    // 성공이면 result는 비우기
+    resultEl.textContent = "";
+
+  } catch (err) {
+    showError("요청 실패! 서버가 켜져 있는지 확인해줘.");
+    resultEl.textContent = String(err);
+  } finally {
+    setLoading(false);
+  }
+});
+
+// ✅ 더보기
+moreBtn.addEventListener("click", () => {
+  shownCount += 20;
+  renderSummary({ comments: allComments, counts: { totalFetched: allComments.length } });
+  renderComments();
+});
+
+// ✅ 감정 필터 버튼 클릭
+for (const btn of filterBtns) {
+  btn.addEventListener("click", () => {
+    const next = btn.dataset.filter || "all";
+    currentFilter = next;
+
+    for (const b of filterBtns) b.classList.remove("is-active");
+    btn.classList.add("is-active");
+
+    shownCount = 20;
+    renderSummary({ comments: allComments, counts: { totalFetched: allComments.length } });
+    renderComments();
+  });
+}
+
+// ✅ 정렬 변경: 프론트에서 재정렬 금지!
+// 정렬 바꿔도 현재 결과는 그대로(서버 결과 유지)
+// -> 적용하려면 분석하기를 다시 눌러야 함
+sortSelect.addEventListener("change", () => {
+  shownCount = 20;
+  renderSummary({ comments: allComments, counts: { totalFetched: allComments.length } });
+  renderComments();
+});
