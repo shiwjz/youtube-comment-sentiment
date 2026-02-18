@@ -29,6 +29,41 @@ const sortSelect = document.getElementById("sort");
 const langSelect = document.getElementById("langSelect");
 const randomCheckbox = document.getElementById("randomSample");
 
+const suggestBtn = document.getElementById("suggestBtn");
+const suggestText = document.getElementById("suggestText");
+const suggestLabel = document.getElementById("suggestLabel");
+const suggestMsg = document.getElementById("suggestMsg");
+
+suggestBtn.addEventListener("click", async () => {
+  const text = suggestText.value.trim();
+  const label = suggestLabel.value;
+
+  if (!text) {
+    suggestMsg.textContent = "문장을 입력해줘!";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, label })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || data.ok === false) {
+      suggestMsg.textContent = "저장 실패 😢";
+      return;
+    }
+
+    suggestMsg.textContent = "제안이 저장되었습니다! (검토 대기)";
+    suggestText.value = "";
+
+  } catch (err) {
+    suggestMsg.textContent = "서버 오류 발생";
+  }
+});
 // ✅ 감정 필터 버튼들 (index.html에 추가해둔 것)
 const filterBtns = document.querySelectorAll(".filter-btn");
 let currentFilter = "all";
@@ -86,6 +121,8 @@ function renderSummary(data) {
 }
 
 function renderComments() {
+
+
   commentListEl.innerHTML = "";
 
   if (!Array.isArray(allComments) || allComments.length === 0) {
@@ -106,24 +143,54 @@ function renderComments() {
   const preview = filtered.slice(0, shownCount);
 
   for (const c of preview) {
-    const s = (c.sentiment || "neutral");
-    const li = document.createElement("li");
-    li.className = "comment-item";
-    li.innerHTML = `
-      <div class="comment-top">
-        <span class="badge ${escapeHtml(s)}">${sentimentLabel(s)}</span>
-      </div>
+  const s = (c.sentiment || "neutral");
 
-      <div class="comment-text">${escapeHtml(c.text || "")}</div>
+  // ✅ 근거 텍스트 만들기
+  const pos = Array.isArray(c.pos) ? c.pos : [];
+  const neg = Array.isArray(c.neg) ? c.neg : [];
+  const posScore = Number(c.posScore ?? pos.length);
+  const negScore = Number(c.negScore ?? neg.length);
 
-      <div class="comment-meta">
-        <span>${escapeHtml(c.author || "익명")}</span>
-        <span>👍 ${Number(c.likeCount ?? 0)}</span>
-        <span>${escapeHtml((c.publishedAt || "").slice(0, 10))}</span>
-      </div>
-    `;
-    commentListEl.appendChild(li);
+  let reasonText = "판단 근거: 키워드 매칭 없음";
+  if (posScore === 0 && negScore === 0) {
+    reasonText = "판단 근거: 키워드 매칭 없음";
+  } else if (posScore === negScore) {
+    reasonText = `판단 근거: +${pos.join(", +")} / -${neg.join(", -")} (비슷해서 중립)`;
+  } else if (posScore > negScore) {
+    reasonText = `판단 근거: +${pos.join(", +")}`;
+  } else {
+    reasonText = `판단 근거: -${neg.join(", -")}`;
   }
+
+  const li = document.createElement("li");
+  li.className = "comment-item";
+  li.innerHTML = `
+  <div class="comment-top">
+    <span class="badge ${escapeHtml(s)}">${sentimentLabel(s)}</span>
+  </div>
+
+  <div class="comment-text">${escapeHtml(c.text || "")}</div>
+
+  ${c.reason?.positive?.length ? 
+    `<div class="reason positive">
+        긍정 근거: ${c.reason.positive.map(r => escapeHtml(r)).join(", ")}
+     </div>` : ""}
+
+  ${c.reason?.negative?.length ? 
+    `<div class="reason negative">
+        부정 근거: ${c.reason.negative.map(r => escapeHtml(r)).join(", ")}
+     </div>` : ""}
+
+  <div class="comment-meta">
+    <span>${escapeHtml(c.author || "익명")}</span>
+    <span>👍 ${Number(c.likeCount ?? 0)}</span>
+    <span>${escapeHtml((c.publishedAt || "").slice(0, 10))}</span>
+  </div>
+`;
+
+  commentListEl.appendChild(li);
+}
+
 
   // 더보기 버튼 표시 여부
   if (shownCount < filtered.length) {
@@ -204,7 +271,13 @@ analyzeBtn.addEventListener("click", async () => {
     const data = await res.json();
 
     if (!res.ok) {
-      showError(data.error || "서버 오류가 발생했어.");
+      const msg =
+      (data?.error?.message) ||
+      (typeof data?.error === "string" ? data.error : "") ||
+      "서버 오류가 발생했어.";
+
+    showError(msg);
+
       resultEl.textContent = JSON.stringify(data, null, 2);
       return;
     }

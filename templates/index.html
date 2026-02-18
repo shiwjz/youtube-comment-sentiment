@@ -89,6 +89,23 @@
 
       <pre id="result">여기에 결과가 표시됩니다.</pre>
     </section>
+
+    <section id="suggestBox" class="suggest-box">
+  <h3>감정 키워드 제안</h3>
+
+  <input type="text" id="suggestText" placeholder="예: 존나 재밌다 / 개구림" />
+
+  <select id="suggestLabel">
+    <option value="positive">긍정</option>
+    <option value="negative">부정</option>
+    <option value="neutral">중립</option>
+  </select>
+
+  <button id="suggestBtn">제안 보내기</button>
+
+  <div id="suggestMsg" class="suggest-msg"></div>
+</section>
+
   </main>
 
   <script src="/static/script.js"></script>
