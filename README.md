@@ -1,4 +1,4 @@
-# YouTube Comment Sentiment Analyzer (M5)
+# YouTube Comment Sentiment Analyzer
 
 > Two developers built this web + big data project to analyze YouTube comments.
 > It collects comments using the YouTube Data API and classifies them into positive, neutral, or negative.
@@ -11,8 +11,7 @@
 ## 🖼️ Screenshots
 | Home | Result |
 |---|---|
-| <img width="3360" height="2100" alt="image" src="https://github.com/user-attachments/assets/765f6148-154c-47e1-867e-363c56d8d2ca" />
- | <img width="1592" height="1472" alt="image" src="https://github.com/user-attachments/assets/bb264cb8-b410-40db-94f0-c6d0e8e6c215" /> |
+| <img width="3360" height="2100" alt="image" src="https://github.com/user-attachments/assets/765f6148-154c-47e1-867e-363c56d8d2ca" /> | <img width="1592" height="1472" alt="image" src="https://github.com/user-attachments/assets/bb264cb8-b410-40db-94f0-c6d0e8e6c215" /> |
 
 ---
 
